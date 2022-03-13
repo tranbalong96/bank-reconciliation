@@ -9,7 +9,7 @@ export class TransactionController {
         private readonly transactionService: TransactionService,
     ) { }
 
-    @EventPattern('/create')
+    @EventPattern('create')
     async create(dto: TransactionDTO[]) {
         return await this.transactionService.create(dto);
     }

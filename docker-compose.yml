@@ -1,44 +1,33 @@
 version: '3.2'
 services:
-  api_public_bank_reconciliation:
+  api-public-bank-reconciliation:
     image: api-public-bank-reconciliation
-    build:
-      dockerfile: DockerfilePublic
-      context: ./api-public-bank-reconciliation
-    container_name: api_public_bank_reconciliation
     depends_on:
-      - bank_reconciliation_db
+      - mysql-db
     ports:
       - "8000:3000"
     volumes:
       - ./src:/home/app/src
     environment:
-      DB_HOST: bank_reconciliation_db
+      DB_HOST: mysql-db
       DB_USER: user
       DB_PASSWORD: secret
       DB_NAME: bank_reconciliation
       
-  api_private_bank_reconciliation:
+  api-private-bank-reconciliation:
     image: api-private-bank-reconciliation
-    build:
-      dockerfile: DockerfilePrivate
-      context: ./api-private-bank-reconciliation
-    container_name: api_private_bank_reconciliation
     depends_on:
-      - bank_reconciliation_db
-    ports:
-      - "8001:3001"
+      - mysql-db
     volumes:
       - ./src:/home/app/src
     environment:
-      DB_HOST: bank_reconciliation_db
+      DB_HOST: mysql-db
       DB_USER: user
       DB_PASSWORD: secret
       DB_NAME: bank_reconciliation
       
-  bank_reconciliation_db:
+  mysql-db:
     image: mysql:5.7
-    container_name: bank_reconciliation_db
     volumes:
       - db_data:/var/lib/mysql
     environment:
@@ -46,22 +35,24 @@ services:
       MYSQL_DATABASE: bank_reconciliation
       MYSQL_USER: user
       MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin
     depends_on:
-      - bank_reconciliation_db
+      - mysql-db
     ports:
       - "8888:80"
     environment:
-      PMA_HOST: bank_reconciliation_db
+      PMA_HOST: mysql-db
       MYSQL_ROOT_PASSWORDL: secret
     links:
-      - bank_reconciliation_db
+      - mysql-db
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: rabbitmq
     ports:
       - 5672:5672
       - 15672:15672

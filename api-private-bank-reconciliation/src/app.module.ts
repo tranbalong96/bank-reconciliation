@@ -9,13 +9,14 @@ import entities from './typeorm';
     imports: [
         TypeOrmModule.forRoot({
             type: 'mysql',
-            host: 'localhost',
+            host: 'mysql-db',
             port: 3306,
             username: 'user',
             password: 'secret',
             database: 'bank_reconciliation',
             entities,
             synchronize: true,
+            autoLoadEntities: true,
         }),
         TransactionModule,
     ],

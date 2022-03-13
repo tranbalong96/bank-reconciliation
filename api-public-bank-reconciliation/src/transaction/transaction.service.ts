@@ -15,7 +15,9 @@ export class TransactionService {
         const dataJson = isCSV ? this.convertDataCSVToJson(dataString) : this.convertDataExcelToJson(file.buffer, 0);
         try {
             // send data to rabbitmq
-            // this.client.emit('data', dataJson);
+            dataJson.forEach(data => {
+                this.client.emit('create', data);
+            });
         } catch (err) {
             throw new HttpException(
                 {

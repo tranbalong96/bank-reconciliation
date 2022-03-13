@@ -10,9 +10,12 @@ export class TransactionService {
     ) {
     }
 
-    async create(dto: TransactionDTO[]): Promise<TransactionEntity[]> {
+    // async create(dto: TransactionDTO[]): Promise<TransactionEntity[]> {
+    async create(dto: TransactionDTO[]) {
         try {
-            return await this.transactionsRepository.save(dto);
+            console.log(dto)
+            return;
+            // return await this.transactionsRepository.save(dto);
         } catch (err) {
             throw new HttpException(
                 {
