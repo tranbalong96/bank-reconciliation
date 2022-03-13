@@ -2,31 +2,33 @@ version: '3.2'
 services:
   api-public-bank-reconciliation:
     image: api-public-bank-reconciliation
+    build: api-public-bank-reconciliation
     depends_on:
-      - mysql-db
+      - bank_reconciliation_db
     ports:
       - "8000:3000"
     volumes:
       - ./src:/home/app/src
     environment:
-      DB_HOST: mysql-db
+      DB_HOST: bank_reconciliation_db
       DB_USER: user
       DB_PASSWORD: secret
       DB_NAME: bank_reconciliation
       
   api-private-bank-reconciliation:
     image: api-private-bank-reconciliation
+    build: api-private-bank-reconciliation
     depends_on:
-      - mysql-db
+      - bank_reconciliation_db
     volumes:
       - ./src:/home/app/src
     environment:
-      DB_HOST: mysql-db
+      DB_HOST: bank_reconciliation_db
       DB_USER: user
       DB_PASSWORD: secret
       DB_NAME: bank_reconciliation
       
-  mysql-db:
+  bank_reconciliation_db:
     image: mysql:5.7
     volumes:
       - db_data:/var/lib/mysql
@@ -43,14 +45,14 @@ services:
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     depends_on:
-      - mysql-db
+      - bank_reconciliation_db
     ports:
       - "8888:80"
     environment:
-      PMA_HOST: mysql-db
+      PMA_HOST: bank_reconciliation_db
       MYSQL_ROOT_PASSWORDL: secret
     links:
-      - mysql-db
+      - bank_reconciliation_db
   rabbitmq:
     image: rabbitmq:3-management
     ports:

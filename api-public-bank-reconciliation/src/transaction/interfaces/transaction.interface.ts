@@ -1,6 +1,8 @@
+import { TYPE } from "../constant/type.constant";
+
 export interface TransactionInterface {
     content: string;
     amount: number;
-    type: string;
+    type: TYPE;
     date: string;
 }

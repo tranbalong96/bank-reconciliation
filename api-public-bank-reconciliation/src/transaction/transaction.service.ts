@@ -2,23 +2,29 @@ import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { TransactionInterface } from "./interfaces/transaction.interface";
 import * as xlsx from 'xlsx';
 import { ClientProxy } from "@nestjs/microservices";
+import { ValidateData } from "./interfaces/validate-data.interface";
+import { TYPE } from "./constant/type.constant";
+import { CommonHelper } from "../common/common.helper";
 
 @Injectable()
 export class TransactionService {
     constructor(
         @Inject('TRANSACTION_SERVICE') private readonly client: ClientProxy,
-    ) {}
+    ) { }
 
     async import(file: Express.Multer.File) {
         const dataString = file.buffer.toString('utf-8');
         const isCSV = file.originalname.includes('.csv');
         const dataJson = isCSV ? this.convertDataCSVToJson(dataString) : this.convertDataExcelToJson(file.buffer, 0);
         try {
-            // send data to rabbitmq
-            dataJson.forEach(data => {
+
+            const dataSplitUp = this.splitUpData(dataJson.validArr);
+            dataSplitUp.forEach(data => {
                 this.client.emit('create', data);
             });
+            return dataJson;
         } catch (err) {
+            console.log(err)
             throw new HttpException(
                 {
                     errorCode: 'ERROR.INTERNAL_SERVER_ERROR',
@@ -29,9 +35,12 @@ export class TransactionService {
         }
     }
 
-    private convertDataCSVToJson(data: string): object[] {
+    private convertDataCSVToJson(data: string): ValidateData {
         const lines = data.split('\n').filter(line => line.trim() !== '')
-        const result = []
+        const result: ValidateData = {
+            validArr: [],
+            invalidArr: [],
+        };
         const headers = lines[0].replace(/\r/g, '').split(',')
         lines.forEach((line, indexLine) => {
             if (!indexLine) {
@@ -40,25 +49,29 @@ export class TransactionService {
             const object = {};
             const currentLine = line.replace(/\r/g, '').split(',');
             headers.forEach((header, indexHeader) => {
-                let value = currentLine[indexHeader]
+                let value: any = currentLine[indexHeader]
                 if (header === 'date') {
                     // Converted because the date is not in the correct format to save to database dd/MM/yyy hh:MM:ss => MM/dd/yyy hh:MM:ss
 
                     //check validate
                     const dateArr = currentLine[indexHeader].split('/');
                     value = `${dateArr[1]}/${dateArr[0]}/${dateArr[2]}`;
+                } else if (header === 'amount') {
+                    const amount = Number(currentLine[indexHeader])
+                    value = CommonHelper.isValidNumber(amount) ? amount : currentLine[indexHeader];
                 }
                 object[header] = value;
             });
-            result.push(object)
+            const data = object as TransactionInterface;
+            const keyValid = this.isValidData(data) ? 'validArr' : 'invalidArr';
+            result[keyValid].push(data);
         });
         return result;
     }
 
-    private convertDataExcelToJson(buffer: Buffer, sheetPosition?: number): object[] {
+    private convertDataExcelToJson(buffer: Buffer, sheetPosition?: number): ValidateData {
         const workbook = xlsx.read(buffer, { type: "buffer" });
         const result: TransactionInterface[] = [];
-
         if (typeof sheetPosition === 'number') {
             const sheetName = workbook.SheetNames[sheetPosition];
             const worksheet = workbook.Sheets[sheetName]
@@ -72,13 +85,47 @@ export class TransactionService {
         return this.convertValidDate(result);
     }
 
-    private convertValidDate(data: TransactionInterface[]): TransactionInterface[] {
+    private convertValidDate(data: TransactionInterface[]): ValidateData {
+        const result: ValidateData = {
+            validArr: [],
+            invalidArr: [],
+        };
         // Converted because the date is not in the correct format to save to database dd/MM/yyy hh:MM:ss => MM/dd/yyy hh:MM:ss
-        return data.map(dt => {
+        data.map(dt => {
             const dateArr = dt.date.split('/');
             //check validate
             dt.date = `${dateArr[1]}/${dateArr[0]}/${dateArr[2]}`;
+            const keyValid = this.isValidData(dt) ? 'validArr' : 'invalidArr';
+            result[keyValid].push(dt);
             return dt;
         });
+        return result;
+    }
+
+    private isValidData(transaction: TransactionInterface): boolean {
+        return CommonHelper.isValidDate(new Date(transaction.date)) && this.isValidAmountAndType(transaction.amount, transaction.type);
+    }
+
+
+    
+
+    private isValidAmountAndType(amount: number, type: TYPE): boolean {
+        return typeof Number(amount) === 'number' &&
+        (amount > 0 && type === TYPE.DEPOSIT || (amount < 0 || amount == 0) && type === TYPE.WITHDRAW)
+    }
+
+
+    private splitUpData(data: object[], numSplit: number = 1) {
+        const caseNumber = Math.floor(data.length / numSplit);
+        if (data.length < numSplit) {
+            return data;
+        }
+        const splitArr = [];
+        for (let i = 0; i < caseNumber; i++) {
+            const from = i * numSplit;
+            const to = i + numSplit;
+            splitArr[i] = data.slice(from, to);
+        }
+        return splitArr;
     }
 }

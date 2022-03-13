@@ -8,6 +8,7 @@ import {
 import { TYPE } from "../../transaction/constant/type.constant";
 
 export function CheckTypeAmount(property: string, validationOptions?: ValidationOptions) {
+    console.log(123123)
     return (object: any, propertyName: string) => {
         registerDecorator({
             target: object.constructor,
