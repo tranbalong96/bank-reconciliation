@@ -1,30 +1,37 @@
-import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Inject, Injectable, Logger } from "@nestjs/common";
 import { TransactionInterface } from "./interfaces/transaction.interface";
 import * as xlsx from 'xlsx';
 import { ClientProxy } from "@nestjs/microservices";
 import { ValidateData } from "./interfaces/validate-data.interface";
 import { TYPE } from "./constant/type.constant";
 import { CommonHelper } from "../common/common.helper";
+import { ConfigService } from "../config";
 
 @Injectable()
 export class TransactionService {
+    private readonly logger = new Logger(TransactionService.name);
     constructor(
         @Inject('TRANSACTION_SERVICE') private readonly client: ClientProxy,
+        private readonly configService: ConfigService,
     ) { }
 
     async import(file: Express.Multer.File) {
         const dataString = file.buffer.toString('utf-8');
         const isCSV = file.originalname.includes('.csv');
         const dataJson = isCSV ? this.convertDataCSVToJson(dataString) : this.convertDataExcelToJson(file.buffer, 0);
+        this.logger.log(`${dataJson.invalidArr.length} data invalid: ${JSON.stringify(dataJson.invalidArr)}`);
+        if (dataJson.validArr.length === 0) {
+            return dataJson;
+        }
         try {
-
-            const dataSplitUp = this.splitUpData(dataJson.validArr);
+            const LIMIT_NUMBER = this.configService.get('LIMIT_NUMBER');
+            const dataSplitUp = this.splitUpData(dataJson.validArr, LIMIT_NUMBER);
             dataSplitUp.forEach(data => {
                 this.client.emit('create', data);
             });
             return dataJson;
         } catch (err) {
-            console.log(err)
+            this.logger.error('Error -> ', err);
             throw new HttpException(
                 {
                     errorCode: 'ERROR.INTERNAL_SERVER_ERROR',
@@ -36,12 +43,12 @@ export class TransactionService {
     }
 
     private convertDataCSVToJson(data: string): ValidateData {
-        const lines = data.split('\n').filter(line => line.trim() !== '')
+        const lines = data.split('\n').filter(line => line.trim() !== '');
         const result: ValidateData = {
             validArr: [],
             invalidArr: [],
         };
-        const headers = lines[0].replace(/\r/g, '').split(',')
+        const headers = lines[0].replace(/\r/g, '').split(',');
         lines.forEach((line, indexLine) => {
             if (!indexLine) {
                 return;
@@ -57,7 +64,7 @@ export class TransactionService {
                     const dateArr = currentLine[indexHeader].split('/');
                     value = `${dateArr[1]}/${dateArr[0]}/${dateArr[2]}`;
                 } else if (header === 'amount') {
-                    const amount = Number(currentLine[indexHeader])
+                    const amount = Number(currentLine[indexHeader]);
                     value = CommonHelper.isValidNumber(amount) ? amount : currentLine[indexHeader];
                 }
                 object[header] = value;
@@ -115,7 +122,7 @@ export class TransactionService {
     }
 
 
-    private splitUpData(data: object[], numSplit: number = 1) {
+    private splitUpData(data: object[], numSplit: number = 500) {
         const caseNumber = Math.floor(data.length / numSplit);
         if (data.length < numSplit) {
             return data;
