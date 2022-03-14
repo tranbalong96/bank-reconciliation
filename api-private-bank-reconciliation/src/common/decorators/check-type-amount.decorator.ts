@@ -25,8 +25,6 @@ export class MatchConstraint implements ValidatorConstraintInterface {
     validate(value: any, args: ValidationArguments) {
         const [relatedPropertyName] = args.constraints;
         const relatedValue = (args.object as any)[relatedPropertyName];
-        console.log(relatedValue)
-        console.log(value)
         return (value > 0 && relatedValue === TYPE.DEPOSIT) || ((value < 0 || value === 0) && relatedValue === TYPE.WITHDRAW);
     }
     defaultMessage(args: ValidationArguments) {

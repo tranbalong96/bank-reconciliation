@@ -19,6 +19,7 @@ export class ParseFile implements PipeTransform {
         if (Array.isArray(files) && files.length === 0) {
             throw new BadRequestException('Validation failed (files expected)');
         }
+
         if (!FILE_WHILE_LIST.some(whileList => files.originalname.includes(whileList))) {
             throw new BadRequestException('Validation failed (files expected)');
         }
