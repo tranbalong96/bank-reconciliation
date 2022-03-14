@@ -13,7 +13,7 @@ export class TransactionService {
 
     async create(dto: TransactionDTO[]): Promise<TransactionEntity[]> {
         try {
-            this.logger.log(`${dto.length} saved!`)
+            this.logger.log(`${dto.length} saved!`);
             return await this.transactionsRepository.save(dto);
         } catch (err) {
             this.logger.error('Error -> ', err);

@@ -1,23 +1,12 @@
 import { Module } from "@nestjs/common";
 import { ClientsModule, Transport } from "@nestjs/microservices";
+import { RabbitModule } from "../rabbitmq";
 import { TransactionController } from "./transaction.controller";
 import { TransactionService } from "./transaction.service";
 
 @Module({
     imports: [
-        ClientsModule.register([
-            {
-                name: 'TRANSACTION_SERVICE',
-                transport: Transport.RMQ,
-                options: {
-                    urls: ['amqp://rabbitmq:5672'],
-                    queue: 'transactions_queue',
-                    queueOptions: {
-                        durable: false
-                    },
-                },
-            },
-        ]),
+        RabbitModule.register()
     ],
     controllers: [TransactionController],
     providers: [TransactionService],

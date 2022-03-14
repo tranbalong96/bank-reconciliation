@@ -9,4 +9,6 @@ export const configSchema = {
     DB_USER: Joi.string().required(),
     DB_PASSWORD: Joi.string().required(),
     DB_NAME: Joi.string().required(),
+    RABBITMQ_URL: Joi.string().required(),
+    RABBITMQ_PORT: Joi.number().required(),
 };
