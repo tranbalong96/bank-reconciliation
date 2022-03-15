@@ -21,6 +21,11 @@ export class TransactionService {
         private readonly configService: ConfigService,
     ) { }
 
+    /**
+     * import file csv or excel
+     * @param file 
+     * @returns 
+     */
     async import(file: Express.Multer.File) {
         const dataString = file.buffer.toString('utf-8');
         const isCSV = file.originalname.includes('.csv');
@@ -48,6 +53,10 @@ export class TransactionService {
         }
     }
 
+    /**
+     * get all transaction
+     * @returns TransactionEntity[]
+     */
     async getAll(): Promise<TransactionEntity[]> {
         try {
             return await this.transactionsRepository.getAllTransaction();
@@ -63,6 +72,11 @@ export class TransactionService {
         }
     }
 
+    /**
+     * get transaction by id
+     * @param id 
+     * @returns TransactionEntity
+     */
     async getById(id: number): Promise<TransactionEntity> {
         if (!CommonHelper.isValidNumber(id)) {
             this.logger.error('Error -> id must be number',);
@@ -88,6 +102,11 @@ export class TransactionService {
         }
     }
 
+    /**
+     * create transaction
+     * @param dto 
+     * @returns TransactionEntity
+     */
     async create(dto: TransactionDTO): Promise<TransactionEntity> {
         const data = this.interfaceMapper(dto);
         try {
@@ -103,7 +122,12 @@ export class TransactionService {
             );
         }
     }
-
+    /**
+     * update transaction by id
+     * @param id 
+     * @param dto 
+     * @returns UpdateResult
+     */
     async update(id: number, dto: TransactionDTO): Promise<UpdateResult> {
         if (!CommonHelper.isValidNumber(id)) {
             this.logger.error('Error -> id must be number',);
@@ -141,6 +165,11 @@ export class TransactionService {
         }
     }
 
+    /**
+     * delete transaction by id
+     * @param id 
+     * @returns DeleteResult
+     */
     async delete(id: number): Promise<DeleteResult> {
         if (!CommonHelper.isValidNumber(id)) {
             this.logger.error('Error -> id must be number',);
@@ -177,6 +206,11 @@ export class TransactionService {
         }
     }
 
+    /**
+     * convert dto to interface
+     * @param dto 
+     * @returns SaveTransactionInterface
+     */
     private interfaceMapper(dto: TransactionDTO): SaveTransactionInterface {
         const result: SaveTransactionInterface = {
             ...dto,
@@ -184,6 +218,11 @@ export class TransactionService {
         return result;
     }
 
+    /**
+     * convert data to json with csv data
+     * @param data 
+     * @returns ValidateData
+     */
     private convertDataCSVToJson(data: string): ValidateData {
         const lines = data.split('\n').filter(line => line.trim() !== '');
         const result: ValidateData = {
@@ -218,6 +257,12 @@ export class TransactionService {
         return result;
     }
 
+    /**
+     * convert data to json with excel data
+     * @param buffer 
+     * @param sheetPosition 
+     * @returns 
+     */
     private convertDataExcelToJson(buffer: Buffer, sheetPosition?: number): ValidateData {
         const workbook = xlsx.read(buffer, { type: "buffer" });
         const result: TransactionInterface[] = [];
@@ -234,6 +279,11 @@ export class TransactionService {
         return this.convertValidDate(result);
     }
 
+    /**
+     * convert date to date valid
+     * @param data 
+     * @returns ValidateData
+     */
     private convertValidDate(data: TransactionInterface[]): ValidateData {
         const result: ValidateData = {
             validArr: [],
@@ -251,6 +301,11 @@ export class TransactionService {
         return result;
     }
 
+    /**
+     * check data valid
+     * @param transaction 
+     * @returns 
+     */
     private isValidData(transaction: TransactionInterface): boolean {
         return CommonHelper.isValidDate(new Date(transaction.date)) && this.isValidAmountAndType(transaction.amount, transaction.type);
     }
