@@ -6,12 +6,18 @@ import { ValidateData } from "./interfaces/validate-data.interface";
 import { TYPE } from "./constant/type.constant";
 import { CommonHelper } from "../common/common.helper";
 import { ConfigService } from "../config";
+import { TransactionRepository } from "./transaction.repository";
+import { TransactionEntity } from "src/typeorm";
+import { TransactionDTO } from "./dto/transaction.dto";
+import { SaveTransactionInterface } from "./interfaces/save-transaction.interface";
+import { DeleteResult, UpdateResult } from "typeorm";
 
 @Injectable()
 export class TransactionService {
     private readonly logger = new Logger(TransactionService.name);
     constructor(
         @Inject('TRANSACTION_SERVICE') private readonly client: ClientProxy,
+        private readonly transactionsRepository: TransactionRepository,
         private readonly configService: ConfigService,
     ) { }
 
@@ -40,6 +46,142 @@ export class TransactionService {
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
         }
+    }
+
+    async getAll(): Promise<TransactionEntity[]> {
+        try {
+            return await this.transactionsRepository.getAllTransaction();
+        } catch (err) {
+            this.logger.error('Error -> ', err);
+            throw new HttpException(
+                {
+                    errorCode: 'ERROR.INTERNAL_SERVER_ERROR',
+                    errorMessage: 'Cannot get data',
+                },
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+    }
+
+    async getById(id: number): Promise<TransactionEntity> {
+        if (!CommonHelper.isValidNumber(id)) {
+            this.logger.error('Error -> id must be number',);
+            throw new HttpException(
+                {
+                    errorCode: 'ERROR.BAD_REQUEST',
+                    errorMessage: 'id must be number',
+                },
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+        try {
+            return await this.transactionsRepository.getById(id);
+        } catch (err) {
+            this.logger.error('Error -> ', err);
+            throw new HttpException(
+                {
+                    errorCode: 'ERROR.INTERNAL_SERVER_ERROR',
+                    errorMessage: 'Cannot get transaction',
+                },
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+    }
+
+    async create(dto: TransactionDTO): Promise<TransactionEntity> {
+        const data = this.interfaceMapper(dto);
+        try {
+            return await this.transactionsRepository.saveTransaction(data);
+        } catch (err) {
+            this.logger.error('Error -> ', err);
+            throw new HttpException(
+                {
+                    errorCode: 'ERROR.INTERNAL_SERVER_ERROR',
+                    errorMessage: 'Cannot save data',
+                },
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+    }
+
+    async update(id: number, dto: TransactionDTO): Promise<UpdateResult> {
+        if (!CommonHelper.isValidNumber(id)) {
+            this.logger.error('Error -> id must be number',);
+            throw new HttpException(
+                {
+                    errorCode: 'ERROR.BAD_REQUEST',
+                    errorMessage: 'id must be number',
+                },
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+        try {
+            const isIdExisted = this.transactionsRepository.isIdExisted(id);
+            if (!isIdExisted) {
+                this.logger.error('Error -> id not existed',);
+                throw new HttpException(
+                    {
+                        errorCode: 'ERROR.BAD_REQUEST',
+                        errorMessage: 'id not existed',
+                    },
+                    HttpStatus.BAD_REQUEST,
+                );
+            }
+            const data = this.interfaceMapper(dto);
+            return await this.transactionsRepository.updateTransaction(id, data);
+        } catch (err) {
+            this.logger.error('Error -> ', err);
+            throw new HttpException(
+                {
+                    errorCode: 'ERROR.INTERNAL_SERVER_ERROR',
+                    errorMessage: 'Cannot update data',
+                },
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+    }
+
+    async delete(id: number): Promise<DeleteResult> {
+        if (!CommonHelper.isValidNumber(id)) {
+            this.logger.error('Error -> id must be number',);
+            throw new HttpException(
+                {
+                    errorCode: 'ERROR.BAD_REQUEST',
+                    errorMessage: 'id must be number',
+                },
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+        try {
+            const isIdExisted = this.transactionsRepository.isIdExisted(id);
+            if (!isIdExisted) {
+                this.logger.error('Error -> id not existed',);
+                throw new HttpException(
+                    {
+                        errorCode: 'ERROR.BAD_REQUEST',
+                        errorMessage: 'id not existed',
+                    },
+                    HttpStatus.BAD_REQUEST,
+                );
+            }
+            return await this.transactionsRepository.deleteTransaction(id);
+        } catch (err) {
+            this.logger.error('Error -> ', err);
+            throw new HttpException(
+                {
+                    errorCode: 'ERROR.INTERNAL_SERVER_ERROR',
+                    errorMessage: 'Cannot delete data',
+                },
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+    }
+
+    private interfaceMapper(dto: TransactionDTO): SaveTransactionInterface {
+        const result: SaveTransactionInterface = {
+            ...dto,
+        };
+        return result;
     }
 
     private convertDataCSVToJson(data: string): ValidateData {
@@ -114,11 +256,11 @@ export class TransactionService {
     }
 
 
-    
+
 
     private isValidAmountAndType(amount: number, type: TYPE): boolean {
         return typeof Number(amount) === 'number' &&
-        (amount > 0 && type === TYPE.DEPOSIT || (amount < 0 || amount == 0) && type === TYPE.WITHDRAW)
+            (amount > 0 && type === TYPE.DEPOSIT || (amount < 0 || amount == 0) && type === TYPE.WITHDRAW)
     }
 
 
