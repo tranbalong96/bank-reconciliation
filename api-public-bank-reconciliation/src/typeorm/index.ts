@@ -1,5 +1,6 @@
 import { TransactionEntity } from "./transaction.entity";
-const entities = [TransactionEntity];
+import { UserEntity } from "./user.entity";
+const entities = [TransactionEntity, UserEntity];
 
-export { TransactionEntity }
+export { TransactionEntity, UserEntity }
 export default entities;

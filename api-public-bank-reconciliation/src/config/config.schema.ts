@@ -12,4 +12,7 @@ export const configSchema = {
     DB_USER: Joi.string().required(),
     DB_PASSWORD: Joi.string().required(),
     DB_NAME: Joi.string().required(),
+    SALT_OR_ROUNDS: Joi.string().required(),
+    JWT_SECRET: Joi.string().required(),
+    MINUTE_EXPIRES: Joi.number().required(),
 };

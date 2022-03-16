@@ -1,11 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UploadedFile, UseInterceptors, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, UploadedFile, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiOperation } from "@nestjs/swagger";
+import { Roles } from "../common/decorators/roles.decorator";
 import { ParseFile } from "../common/parse-file.pipe";
 import { TransactionDTO } from "./dto/transaction.dto";
 import { TransactionService } from "./transaction.service";
 
 @Controller('transaction')
+@Roles()
 export class TransactionController {
     constructor(
         private readonly transactionService: TransactionService,

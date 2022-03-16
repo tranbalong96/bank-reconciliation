@@ -7,7 +7,7 @@ import { TYPE } from "./constant/type.constant";
 import { CommonHelper } from "../common/common.helper";
 import { ConfigService } from "../config";
 import { TransactionRepository } from "./transaction.repository";
-import { TransactionEntity } from "src/typeorm";
+import { TransactionEntity } from "../typeorm";
 import { TransactionDTO } from "./dto/transaction.dto";
 import { SaveTransactionInterface } from "./interfaces/save-transaction.interface";
 import { DeleteResult, UpdateResult } from "typeorm";

@@ -24,7 +24,7 @@ export class MysqlDatabaseModule {
                             database: configService.get('DB_NAME') || '',
                             entities,
                             autoLoadEntities: true,
-                            synchronize: false,
+                            synchronize: true,
                         };
                     }
                 })

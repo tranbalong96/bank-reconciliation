@@ -15,4 +15,12 @@ export class ConfigService extends NestConfigService {
     public getRabbitMQPort() {
         return this.get('RABBITMQ_PORT');
     }
+
+    public getSecret() {
+        return this.get('JWT_SECRET');
+    }
+
+    public getExpiresIn() {
+        return this.get('MINUTE_EXPIRES');
+    }
 }

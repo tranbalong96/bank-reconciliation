@@ -1,4 +1,4 @@
-import { TransactionEntity } from "src/typeorm";
+import { TransactionEntity } from "../typeorm";
 import { DeleteResult, EntityRepository, Repository, UpdateResult } from "typeorm";
 import { SaveTransactionInterface } from "./interfaces/save-transaction.interface";
 

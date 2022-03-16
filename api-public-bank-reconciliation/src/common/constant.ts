@@ -6,3 +6,4 @@ export const ENV = {
 };
 
 export const FILE_WHILE_LIST = ['.csv', 'xlsx'];
+export const SECRET = 'SECRET'
