@@ -9,6 +9,19 @@
       </ul>
     </li>
     <li>
+      <a href="#solution-diagrams">Solution diagrams</a>
+    </li>
+    <li>
+      <a href="#docker-container">Docker Container</a>
+      <ul>
+        <li><a href="#api-public-bank-reconciliation">api-public-bank-reconciliation</a></li>
+        <li><a href="#api-private-bank-reconciliation">api-private-bank-reconciliation</a></li>
+        <li><a href="#bank_reconciliation_db">bank_reconciliation_db</a></li>
+        <li><a href="#phpmyadmin">phpmyadmin</a></li>
+        <li><a href="#rabbitmq">rabbitmq</a></li>
+      </ul>
+    </li>
+    <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
@@ -16,11 +29,18 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
+    <li><a href="#curl">cURL</a>
+    <!-- <ul>
+        <li><a href="#register_account">Register account</a></li>
+        <li><a href="#login">Login</a></li>
+        <li><a href="#import">Import transaction with file</a></li>
+        <li><a href="#get_all">Get all transactions</a></li>
+        <li><a href="#get_by_id">Get by transaction id</a></li>
+        <li><a href="#create">Create new transaction</a></li>
+        <li><a href="#update">Update transaction</a></li>
+        <li><a href="#delete">Delete  transaction</a></li>
+      </ul> -->
+    </li>
   </ol>
 </details>
 
@@ -178,11 +198,11 @@ If success will be return:
 ### Import transaction with file
 #### Import csv file 
 ```
-curl -X POST "http://localhost:8000/transaction/import" -H "Authorization: Bearer {token}" -F "file=@to/transaction.csv"
+curl -X POST "http://localhost:8000/transaction/import" -H "Authorization: Bearer {token}" -F "file=@records/transaction.csv"
 ```
 #### Import excel file 
 ```
-curl -X POST "http://localhost:8000/transaction/import" -H "Authorization: Bearer {token}" -F "file=@to/transaction.xlsx"
+curl -X POST "http://localhost:8000/transaction/import" -H "Authorization: Bearer {token}" -F "file=@records/transaction.xlsx"
 ```
 #### Description 
 - `token` can get this token after login
