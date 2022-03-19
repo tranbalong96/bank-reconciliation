@@ -327,7 +327,7 @@ export class TransactionService {
         const splitArr = [];
         for (let i = 0; i < caseNumber; i++) {
             const from = i * numSplit;
-            const to = i + numSplit;
+            const to = (i * numSplit) + numSplit;
             splitArr[i] = data.slice(from, to);
         }
         return splitArr;
