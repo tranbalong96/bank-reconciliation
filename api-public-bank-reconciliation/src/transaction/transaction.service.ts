@@ -330,7 +330,7 @@ export class TransactionService {
 
 
     private splitUpData(data: object[], numSplit: number = 500) {
-        const caseNumber = Number((data.length / numSplit).toFixed());
+        const caseNumber = Math.ceil(data.length / numSplit);
         if (data.length < numSplit) {
             return data;
         }
