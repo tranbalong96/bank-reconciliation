@@ -11,6 +11,7 @@ import { TransactionEntity } from "../typeorm";
 import { TransactionDTO } from "./dto/transaction.dto";
 import { SaveTransactionInterface } from "./interfaces/save-transaction.interface";
 import { DeleteResult, UpdateResult } from "typeorm";
+import { ImportRO } from "./ro/import.ro";
 
 @Injectable()
 export class TransactionService {
@@ -26,13 +27,17 @@ export class TransactionService {
      * @param file 
      * @returns 
      */
-    async import(file: Express.Multer.File) {
+    async import(file: Express.Multer.File): Promise<ImportRO> {
         const dataString = file.buffer.toString('utf-8');
         const isCSV = file.originalname.includes('.csv');
         const dataJson = isCSV ? this.convertDataCSVToJson(dataString) : this.convertDataExcelToJson(file.buffer, 0);
         this.logger.log(`${dataJson.invalidArr.length} data invalid: ${JSON.stringify(dataJson.invalidArr)}`);
         if (dataJson.validArr.length === 0) {
-            return dataJson;
+            return {
+                errorImport: 0,
+                successImport: dataJson.validArr.length,
+                errorData:dataJson.validArr
+            };
         }
         try {
             const LIMIT_NUMBER = this.configService.get('LIMIT_NUMBER');
@@ -40,7 +45,12 @@ export class TransactionService {
             dataSplitUp.forEach(data => {
                 this.client.emit('create', data);
             });
-            return dataJson;
+            const result: ImportRO = {
+                successImport: dataJson.validArr.length,
+                errorImport: dataJson.invalidArr.length,
+                errorData: dataJson.invalidArr
+            };
+            return result;
         } catch (err) {
             this.logger.error('Error -> ', err);
             throw new HttpException(
@@ -320,7 +330,7 @@ export class TransactionService {
 
 
     private splitUpData(data: object[], numSplit: number = 500) {
-        const caseNumber = Math.floor(data.length / numSplit);
+        const caseNumber = Number((data.length / numSplit).toFixed());
         if (data.length < numSplit) {
             return data;
         }

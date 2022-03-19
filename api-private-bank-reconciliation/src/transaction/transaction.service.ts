@@ -11,10 +11,13 @@ export class TransactionService {
     ) {
     }
 
-    async create(dto: TransactionDTO[]): Promise<TransactionEntity[]> {
+    async create(dto: TransactionDTO[]) {
         try {
             this.logger.log(`${dto.length} saved!`);
-            return await this.transactionsRepository.save(dto);
+            await this.transactionsRepository.save(dto);
+            return {
+                successImport: dto.length,
+            }
         } catch (err) {
             this.logger.error('Error -> ', err);
             throw new HttpException(
