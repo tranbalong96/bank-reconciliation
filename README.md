@@ -210,8 +210,9 @@ curl -X POST "http://localhost:8000/transaction/import" -H "Authorization: Beare
 <br />
 If success will be return:
 
-- Array `validArr` have data will be inserted into database.
-- Array `invalidArr` have data invalid, it's don't insert to database
+- `successImport` number record can import to database.
+- `errorImport` number record can't import to database.
+- Array `errorData` have data invalid, it's don't insert to database
 ### Get all transactions
 ```
 curl -X GET "http://localhost:8000/transaction" -H "Content-Type: application/json" -H "Authorization: Bearer {token}"
