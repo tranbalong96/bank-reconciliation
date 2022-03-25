@@ -208,7 +208,7 @@ curl -X POST "http://localhost:8000/transaction/import" -H "Authorization: Beare
 - `token` can get this token after login
 
 <br />
-If success will be return:
+If will be return:
 
 - `successImport` number record can import to database.
 - `errorImport` number record can't import to database.
