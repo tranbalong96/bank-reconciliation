@@ -187,8 +187,8 @@ If success will be return:
 curl -X POST "http://localhost:8000/auth/login" -H "Content-Type: application/json" -d "{\"username\":\"username\",\"password\":\"12345678\"}"
 ```
 #### Description 
+- `username` for the user to login into the system
 - `password` for the user to login into the system
-- `confirmPassword` conform your password
 
 <br />
 If success will be return:
