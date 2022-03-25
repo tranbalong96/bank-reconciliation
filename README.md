@@ -212,7 +212,7 @@ If success will be return:
 
 - `successImport` number record can import to database.
 - `errorImport` number record can't import to database.
-- Array `errorData` have data invalid, it's don't insert to database
+- Array `errorData` have data invalid in file, it's don't insert to database. If `errorImport` equal `0` then `errorData`: [] else return `errorData`: [{object}]
 ### Get all transactions
 ```
 curl -X GET "http://localhost:8000/transaction" -H "Content-Type: application/json" -H "Authorization: Bearer {token}"
